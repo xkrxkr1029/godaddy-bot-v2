@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoDaddy 실제 자동 경매 입찰 봇</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 450px;
+            width: 100%;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px 20px 0 0 !important;
+            border: none;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .card-body {
+            padding: 2rem;
+        }
+        
+        .form-control {
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .alert {
+            border-radius: 12px;
+            border: none;
+        }
+        
+        .real-mode-badge {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 107, 107, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+        }
+        
+        .feature-list {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        
+        .feature-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .feature-icon {
+            color: #28a745;
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border: 1px solid #ffc107;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+        
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+        }
+        
+        .toast {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="login-card">
+                        <div class="card-header">
+                            <div class="real-mode-badge">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                실제 모드
+                            </div>
+                            <h3 class="mb-0">
+                                <i class="fas fa-gavel me-2"></i>
+                                GoDaddy 자동 경매 봇
+                            </h3>
+                            <p class="mb-0 mt-2 opacity-75">실제 GoDaddy 계정으로 로그인</p>
+                        </div>
+                        
+                        <div class="card-body">
+                            <!-- 로그인 폼 -->
+                            <form id="login-form">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">
+                                        <i class="fas fa-envelope me-1"></i>
+                                        GoDaddy 이메일
+                                    </label>
+                                    <input type="email" class="form-control" id="email" 
+                                           value="richrich2667@gmail.com" required 
+                                           placeholder="your@email.com">
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="password" class="form-label">
+                                        <i class="fas fa-lock me-1"></i>
+                                        비밀번호
+                                    </label>
+                                    <input type="password" class="form-control" id="password" 
+                                           value="rJk%2.FQ4Wck$eW" required 
+                                           placeholder="••••••••">
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary w-100" id="login-btn">
+                                    <i class="fas fa-sign-in-alt me-1"></i>
+                                    실제 GoDaddy 로그인
+                                </button>
+                            </form>
+                            
+                            <!-- 기능 설명 -->
+                            <div class="feature-list">
+                                <h6 class="mb-3">
+                                    <i class="fas fa-star text-warning me-1"></i>
+                                    실제 기능
+                                </h6>
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span>실제 GoDaddy 계정 연동</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span>실시간 경매 데이터</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span>자동 입찰 시스템 (+$5)</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <span>최대 입찰 한도 $180</span>
+                                </div>
+                            </div>
+                            
+                            <!-- 경고 -->
+                            <div class="warning-box">
+                                <h6 class="text-warning mb-2">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    중요 안내
+                                </h6>
+                                <ul class="mb-0 small">
+                                    <li>실제 GoDaddy 계정으로 로그인됩니다</li>
+                                    <li>실제 입찰이 실행될 수 있습니다</li>
+                                    <li>자동 입찰로 인한 손실 책임지지 않음</li>
+                                    <li>계정 정보는 서버에 저장되지 않습니다</li>
+                                </ul>
+                            </div>
+                            
+                            <!-- 상태 표시 -->
+                            <div class="mt-3">
+                                <div id="status-indicator" class="d-flex align-items-center">
+                                    <span class="badge bg-secondary me-2">오프라인</span>
+                                    <small class="text-muted">서버 연결 대기 중...</small>
+                                </div>
+                            </div>
+                            
+                            <!-- 로그 -->
+                            <div class="mt-3">
+                                <div class="card">
+                                    <div class="card-header py-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-history me-1"></i>
+                                            활동 로그
+                                        </small>
+                                    </div>
+                                    <div class="card-body py-2" style="max-height: 150px; overflow-y: auto;">
+                                        <div id="log-container">
+                                            <small class="text-muted">로그가 여기에 표시됩니다...</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 알림 -->
+    <div class="toast-container">
+        <div id="toast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="fas fa-info-circle text-primary me-2"></i>
+                <strong class="me-auto">알림</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="toast-body">
+                메시지
+            </div>
+        </div>
+    </div>
+
+    <!-- 스크립트 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script>
+        class GoDaddyRealBot {
+            constructor() {
+                this.socket = io();
+                this.isLoggedIn = false;
+                
+                this.initializeEventListeners();
+                this.initializeSocketEvents();
+            }
+            
+            initializeEventListeners() {
+                // 로그인 폼
+                document.getElementById('login-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.login();
+                });
+            }
+            
+            initializeSocketEvents() {
+                // 연결 이벤트
+                this.socket.on('connect', () => {
+                    this.updateStatus('온라인', 'success');
+                    this.addLog('🔗 서버에 연결되었습니다.', 'success');
+                });
+                
+                this.socket.on('disconnect', () => {
+                    this.updateStatus('오프라인', 'danger');
+                    this.addLog('❌ 서버 연결이 끊어졌습니다.', 'error');
+                });
+                
+                // 로그인 결과
+                this.socket.on('login_result', (data) => {
+                    console.log('로그인 결과 수신:', data);
+                    
+                    const loginBtn = document.getElementById('login-btn');
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt me-1"></i>실제 GoDaddy 로그인';
+                    
+                    if (data.success) {
+                        this.isLoggedIn = true;
+                        this.addLog('✅ GoDaddy 로그인 성공! 대시보드로 이동합니다...', 'success');
+                        this.showToast('로그인 성공!', '승환님의 실제 대시보드로 이동합니다...', 'success');
+                        
+                        // 1.5초 후 대시보드로 리다이렉트
+                        setTimeout(() => {
+                            window.location.href = '/dashboard';
+                        }, 1500);
+                    } else {
+                        this.addLog(`❌ 로그인 실패: ${data.message}`, 'error');
+                        this.showToast('로그인 실패', data.message, 'error');
+                    }
+                });
+            }
+            
+            async login() {
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value.trim();
+                
+                if (!email || !password) {
+                    this.showToast('오류', '이메일과 비밀번호를 입력하세요.', 'error');
+                    return;
+                }
+                
+                const loginBtn = document.getElementById('login-btn');
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>로그인 중...';
+                
+                this.addLog(`🔐 GoDaddy 로그인 시도: ${email}`, 'info');
+                
+                try {
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            email: email,
+                            password: password
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.addLog('⏳ 실제 GoDaddy 서버에 연결 중...', 'info');
+                    } else {
+                        this.addLog(`❌ 로그인 요청 실패: ${data.message}`, 'error');
+                        this.showToast('오류', data.message, 'error');
+                        
+                        loginBtn.disabled = false;
+                        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt me-1"></i>실제 GoDaddy 로그인';
+                    }
+                } catch (error) {
+                    this.addLog(`❌ 네트워크 오류: ${error.message}`, 'error');
+                    this.showToast('오류', '네트워크 연결을 확인하세요.', 'error');
+                    
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt me-1"></i>실제 GoDaddy 로그인';
+                }
+            }
+            
+            updateStatus(text, type) {
+                const indicator = document.getElementById('status-indicator');
+                const badgeClass = type === 'success' ? 'bg-success' : 
+                                 type === 'danger' ? 'bg-danger' : 'bg-secondary';
+                
+                indicator.innerHTML = `
+                    <span class="badge ${badgeClass} me-2">${text}</span>
+                    <small class="text-muted">실제 GoDaddy 연동 모드</small>
+                `;
+            }
+            
+            addLog(message, type = 'info') {
+                const logContainer = document.getElementById('log-container');
+                const time = new Date().toLocaleTimeString('ko-KR', { 
+                    hour12: false, 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                
+                const colorClass = type === 'success' ? 'text-success' : 
+                                  type === 'error' ? 'text-danger' : 
+                                  type === 'info' ? 'text-primary' : 'text-muted';
+                
+                const logEntry = document.createElement('div');
+                logEntry.className = 'mb-1';
+                logEntry.innerHTML = `
+                    <small class="text-muted">[${time}]</small>
+                    <small class="${colorClass}">${message}</small>
+                `;
+                
+                logContainer.appendChild(logEntry);
+                logContainer.scrollTop = logContainer.scrollHeight;
+                
+                // 로그 항목이 너무 많으면 오래된 것 삭제
+                const entries = logContainer.children;
+                if (entries.length > 20) {
+                    entries[0].remove();
+                }
+            }
+            
+            showToast(title, message, type = 'info') {
+                const toast = document.getElementById('toast');
+                const toastBody = document.getElementById('toast-body');
+                const toastHeader = toast.querySelector('.toast-header strong');
+                const toastIcon = toast.querySelector('.toast-header i');
+                
+                // 아이콘 및 색상 설정
+                const iconMap = {
+                    success: 'fas fa-check-circle text-success',
+                    error: 'fas fa-exclamation-circle text-danger',
+                    warning: 'fas fa-exclamation-triangle text-warning',
+                    info: 'fas fa-info-circle text-primary'
+                };
+                
+                toastIcon.className = iconMap[type] || iconMap.info;
+                toastHeader.textContent = title;
+                toastBody.textContent = message;
+                
+                const bsToast = new bootstrap.Toast(toast, {
+                    delay: 4000
+                });
+                bsToast.show();
+            }
+        }
+        
+        // 전역 봇 인스턴스 생성
+        const bot = new GoDaddyRealBot();
+        
+        // 페이지 로드 완료 시 초기화
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('GoDaddy 실제 봇이 초기화되었습니다.');
+            bot.addLog('🚀 GoDaddy 실제 경매 봇 시작', 'success');
+            bot.addLog('⚠️ 실제 계정으로 로그인하여 실제 입찰이 가능합니다', 'warning');
+        });
+    </script>
+</body>
+</html>
