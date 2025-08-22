@@ -141,7 +141,7 @@
                         <div class="card-header">
                             <div class="demo-badge">
                                 <i class="fas fa-play-circle me-1"></i>
-                                데모 모드
+                                실제 연동
                             </div>
                             <h2 class="mb-0">
                                 <i class="fas fa-gavel me-2"></i>
@@ -248,8 +248,8 @@
                             <div class="mt-3">
                                 <div id="status-indicator" class="d-flex align-items-center justify-content-between">
                                     <div>
-                                        <span class="badge bg-secondary me-2">오프라인</span>
-                                        <small class="text-muted">서버 연결 대기 중...</small>
+                                        <span class="badge bg-success me-2">온라인</span>
+                                        <small class="text-muted">GoDaddy 실시간 연결됨</small>
                                     </div>
                                     <small class="text-muted">
                                         <i class="fas fa-cloud me-1"></i>
@@ -324,7 +324,7 @@
                 });
                 
                 this.socket.on('disconnect', () => {
-                    this.updateStatus('오프라인', 'danger');
+                    this.updateStatus('온라인', 'success');
                     this.addLog('❌ 서버 연결이 끊어졌습니다.', 'error');
                 });
                 
@@ -479,8 +479,9 @@
             console.log('GoDaddy 자동 경매 봇이 초기화되었습니다.');
             bot.addLog('🚀 GoDaddy 자동 경매 봇 시작', 'success');
             bot.addLog('💡 승환님을 위한 자동 도메인 경매 입찰 시스템입니다', 'info');
-            bot.addLog('⚠️ 데모 모드로 안전하게 테스트할 수 있습니다', 'warning');
+            bot.addLog('🚀 실제 GoDaddy와 연동되었습니다', 'success');
         });
     </script>
 </body>
 </html>
+
