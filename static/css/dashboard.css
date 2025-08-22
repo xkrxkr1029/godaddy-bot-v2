@@ -349,22 +349,6 @@ body {
     }
 }
 
-/* 다크 모드 지원 */
-@media (prefers-color-scheme: dark) {
-    .log-container {
-        background: linear-gradient(135deg, #343a40 0%, #495057 100%);
-    }
-    
-    .log-entry {
-        background: #495057;
-        color: #f8f9fa;
-    }
-    
-    .log-message {
-        color: #f8f9fa;
-    }
-}
-
 /* 커스텀 스크롤바 */
 .log-container::-webkit-scrollbar {
     width: 8px;

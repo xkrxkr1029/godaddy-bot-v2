@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-GoDaddy 실제 자동 경매 입찰 봇
-실제 GoDaddy 사이트와 연동하여 작동합니다.
+GoDaddy 자동 경매 입찰 봇
+Railway 호스팅용 메인 애플리케이션
 """
 
 import os
@@ -27,7 +27,6 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('godaddy_real_bot.log', encoding='utf-8'),
         logging.StreamHandler(sys.stdout)
     ]
 )
@@ -49,8 +48,8 @@ class AuctionItem:
     def to_dict(self):
         return asdict(self)
 
-class GoDaddyRealBot:
-    """실제 GoDaddy 경매 봇"""
+class GoDaddyBot:
+    """GoDaddy 경매 봇 클래스"""
     
     def __init__(self):
         self.auction_items: List[AuctionItem] = []
@@ -60,6 +59,7 @@ class GoDaddyRealBot:
         self.login_password = ""
         self.socketio = None
         self.max_bid_limit = 180.0
+        self.demo_mode = True  # 기본적으로 데모 모드
         
         # HTTP 세션 설정
         self.session = requests.Session()
@@ -69,31 +69,73 @@ class GoDaddyRealBot:
             'Accept-Language': 'ko-KR,ko;q=0.9,en;q=0.8',
             'Accept-Encoding': 'gzip, deflate, br',
             'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
         })
         
         # 사용자 프로필 정보
         self.user_profile = {
             "name": "승환",
             "email": "",
-            "account_balance": 0.0,
-            "total_bids": 0,
-            "won_auctions": 0,
-            "active_bids": 0,
-            "member_since": "",
-            "verification_status": "확인 중",
+            "account_balance": 2450.75,
+            "total_bids": 23,
+            "won_auctions": 8,
+            "active_bids": 5,
+            "member_since": "2023년 3월",
+            "verification_status": "인증 완료",
             "bid_limit": 180.0,
             "auto_bid_enabled": True
         }
+        
+        # 데모용 샘플 경매 데이터
+        self.demo_auctions = [
+            AuctionItem("techstartup.com", 15.0, "2시간 30분", 5, 180.0, False, "", "demo1", 0.0),
+            AuctionItem("bestdomain.net", 25.0, "1시간 15분", 8, 180.0, False, "", "demo2", 0.0),
+            AuctionItem("cooldomain.org", 35.0, "3시간 45분", 12, 180.0, False, "", "demo3", 0.0),
+            AuctionItem("awesomesite.com", 45.0, "4시간 20분", 15, 180.0, False, "", "demo4", 0.0),
+            AuctionItem("greatdeal.net", 55.0, "30분", 20, 180.0, False, "", "demo5", 0.0),
+        ]
         
         # GoDaddy URLs
         self.base_url = "https://auctions.godaddy.com"
         self.login_url = "https://sso.godaddy.com/login"
         self.auction_url = "https://auctions.godaddy.com/beta/buying/bids"
-        self.api_base = "https://auctions.godaddy.com/api"
         
     def login(self, email: str, password: str) -> Dict:
-        """GoDaddy 로그인"""
+        """GoDaddy 로그인 (데모 모드 또는 실제 모드)"""
+        try:
+            logger.info(f"로그인 시도: {email}")
+            
+            # 데모 모드에서는 항상 성공
+            if self.demo_mode:
+                logger.info("데모 모드 로그인 처리 중...")
+                time.sleep(2)  # 실제 로그인처럼 시간 지연
+                
+                self.is_logged_in = True
+                self.login_email = email
+                self.login_password = password
+                
+                # 사용자 프로필 업데이트
+                self.user_profile["email"] = email
+                
+                # 데모 경매 데이터 로드
+                self.auction_items = self.demo_auctions.copy()
+                
+                logger.info("데모 모드 로그인 성공!")
+                return {
+                    "success": True, 
+                    "message": "✅ 데모 모드로 로그인 성공! 최대 입찰 한도: $180",
+                    "user_profile": self.user_profile
+                }
+            
+            # 실제 모드 (추후 구현)
+            else:
+                return self.real_login(email, password)
+                
+        except Exception as e:
+            logger.error(f"로그인 오류: {str(e)}")
+            return {"success": False, "message": f"로그인 중 오류가 발생했습니다: {str(e)}"}
+    
+    def real_login(self, email: str, password: str) -> Dict:
+        """실제 GoDaddy 로그인"""
         try:
             logger.info(f"GoDaddy 실제 로그인 시도: {email}")
             
@@ -104,7 +146,7 @@ class GoDaddyRealBot:
             
             soup = BeautifulSoup(login_page.content, 'html.parser')
             
-            # CSRF 토큰이나 기타 필요한 정보 추출
+            # CSRF 토큰 추출
             csrf_token = None
             csrf_input = soup.find('input', {'name': '_token'}) or soup.find('input', {'name': 'csrf_token'})
             if csrf_input:
@@ -154,7 +196,7 @@ class GoDaddyRealBot:
                 return {"success": False, "message": "이메일 또는 비밀번호가 올바르지 않습니다."}
                 
         except Exception as e:
-            logger.error(f"로그인 오류: {str(e)}")
+            logger.error(f"실제 로그인 오류: {str(e)}")
             return {"success": False, "message": f"로그인 중 오류가 발생했습니다: {str(e)}"}
     
     def check_login_success(self, response) -> bool:
@@ -176,12 +218,6 @@ class GoDaddyRealBot:
             success_keywords = ['dashboard', 'account', 'profile', 'logout']
             if any(keyword in content for keyword in success_keywords):
                 return True
-            
-            # 쿠키 확인
-            session_cookies = ['session', 'auth', 'token', 'logged']
-            for cookie in self.session.cookies:
-                if any(keyword in cookie.name.lower() for keyword in session_cookies):
-                    return True
             
             return False
             
@@ -206,7 +242,6 @@ class GoDaddyRealBot:
                     if balance_text:
                         self.user_profile["account_balance"] = float(balance_text.group(1).replace(',', ''))
                 
-                # 기타 정보 추출 (실제 페이지 구조에 따라 조정 필요)
                 self.user_profile["verification_status"] = "인증 완료"
                 self.user_profile["member_since"] = "2023년"
                 
@@ -216,17 +251,19 @@ class GoDaddyRealBot:
     def load_auction_data(self):
         """실제 경매 데이터 로드"""
         try:
-            logger.info("실제 경매 데이터 로딩 중...")
+            logger.info("경매 데이터 로딩 중...")
             
             # 경매 페이지 접근
             response = self.session.get(self.auction_url)
             if response.status_code != 200:
                 logger.error(f"경매 페이지 접근 실패: {response.status_code}")
+                # 실패 시 데모 데이터 사용
+                self.auction_items = self.demo_auctions.copy()
                 return
             
             soup = BeautifulSoup(response.content, 'html.parser')
             
-            # 경매 아이템 추출 (실제 페이지 구조에 따라 조정)
+            # 경매 아이템 추출
             auction_items = []
             
             # 테이블 또는 카드 형태의 경매 목록 찾기
@@ -281,29 +318,23 @@ class GoDaddyRealBot:
                     logger.error(f"경매 아이템 파싱 오류: {str(e)}")
                     continue
             
-            # 데이터가 없으면 샘플 데이터 사용
+            # 데이터가 없으면 데모 데이터 사용
             if not auction_items:
-                logger.info("실제 데이터를 찾을 수 없어 샘플 데이터를 사용합니다.")
-                auction_items = [
-                    AuctionItem("techstartup.com", 15.0, "2시간 30분", 5, 180.0, False, "", "real1", 0.0),
-                    AuctionItem("bestdomain.net", 25.0, "1시간 15분", 8, 180.0, False, "", "real2", 0.0),
-                    AuctionItem("cooldomain.org", 35.0, "3시간 45분", 12, 180.0, False, "", "real3", 0.0),
-                ]
+                logger.info("실제 데이터를 찾을 수 없어 데모 데이터를 사용합니다.")
+                auction_items = self.demo_auctions.copy()
             
             self.auction_items = auction_items
             logger.info(f"경매 데이터 로드 완료: {len(auction_items)}개 아이템")
             
         except Exception as e:
             logger.error(f"경매 데이터 로드 오류: {str(e)}")
-            # 오류 시 샘플 데이터 사용
-            self.auction_items = [
-                AuctionItem("example.com", 20.0, "1시간 30분", 3, 180.0, False, "", "real_sample", 0.0),
-            ]
+            # 오류 시 데모 데이터 사용
+            self.auction_items = self.demo_auctions.copy()
     
     def place_bid(self, domain_name: str, bid_amount: float) -> Dict:
-        """실제 입찰 실행"""
+        """입찰 실행"""
         try:
-            logger.info(f"실제 입찰 시도: {domain_name} - ${bid_amount}")
+            logger.info(f"입찰 시도: {domain_name} - ${bid_amount}")
             
             # 해당 경매 아이템 찾기
             item = next((item for item in self.auction_items if item.domain_name == domain_name), None)
@@ -318,14 +349,36 @@ class GoDaddyRealBot:
             if bid_amount <= item.current_bid:
                 return {"success": False, "message": "현재 입찰가보다 높게 입찰해야 합니다."}
             
+            # 데모 모드에서는 항상 성공
+            if self.demo_mode:
+                item.my_current_bid = bid_amount
+                item.current_bid = bid_amount
+                item.bid_count += 1
+                
+                logger.info(f"데모 입찰 성공: {domain_name} - ${bid_amount}")
+                return {
+                    "success": True, 
+                    "message": f"{domain_name}에 ${bid_amount} 입찰이 성공했습니다! (데모 모드)"
+                }
+            
+            # 실제 입찰 (추후 구현)
+            else:
+                return self.real_place_bid(item, bid_amount)
+                
+        except Exception as e:
+            logger.error(f"입찰 오류: {str(e)}")
+            return {"success": False, "message": f"입찰 중 오류가 발생했습니다: {str(e)}"}
+    
+    def real_place_bid(self, item: AuctionItem, bid_amount: float) -> Dict:
+        """실제 입찰 실행"""
+        try:
             # 실제 입찰 API 호출
-            bid_url = f"{self.api_base}/auctions/{item.auction_id}/bids"
+            bid_url = f"{self.base_url}/api/auctions/{item.auction_id}/bids"
             bid_data = {
                 "amount": bid_amount,
                 "currency": "USD"
             }
             
-            # CSRF 토큰 등 필요한 헤더 추가
             headers = {
                 "Content-Type": "application/json",
                 "X-Requested-With": "XMLHttpRequest",
@@ -334,38 +387,22 @@ class GoDaddyRealBot:
             
             response = self.session.post(bid_url, json=bid_data, headers=headers)
             
-            # 응답 확인
-            if response.status_code == 200 or response.status_code == 201:
-                # 성공적인 입찰
+            if response.status_code in [200, 201]:
                 item.my_current_bid = bid_amount
                 item.current_bid = bid_amount
                 item.bid_count += 1
                 
-                logger.info(f"입찰 성공: {domain_name} - ${bid_amount}")
+                logger.info(f"실제 입찰 성공: {item.domain_name} - ${bid_amount}")
                 return {
                     "success": True, 
-                    "message": f"{domain_name}에 ${bid_amount} 입찰이 성공했습니다!"
+                    "message": f"{item.domain_name}에 ${bid_amount} 입찰이 성공했습니다!"
                 }
             else:
-                # 입찰 실패
                 logger.error(f"입찰 실패: {response.status_code} - {response.text}")
-                
-                # 실제 서비스에서는 API가 작동하지 않을 수 있으므로 시뮬레이션
-                if "실제 입찰 테스트" in domain_name or True:  # 임시로 항상 성공
-                    item.my_current_bid = bid_amount
-                    item.current_bid = bid_amount
-                    item.bid_count += 1
-                    
-                    logger.info(f"입찰 시뮬레이션 성공: {domain_name} - ${bid_amount}")
-                    return {
-                        "success": True, 
-                        "message": f"{domain_name}에 ${bid_amount} 입찰이 성공했습니다! (시뮬레이션)"
-                    }
-                
                 return {"success": False, "message": "입찰 요청이 실패했습니다."}
                 
         except Exception as e:
-            logger.error(f"입찰 오류: {str(e)}")
+            logger.error(f"실제 입찰 오류: {str(e)}")
             return {"success": False, "message": f"입찰 중 오류가 발생했습니다: {str(e)}"}
     
     def start_monitoring(self):
@@ -374,7 +411,7 @@ class GoDaddyRealBot:
             return
         
         self.is_monitoring = True
-        logger.info("실제 경매 모니터링 시작")
+        logger.info("경매 모니터링 시작")
         
         def monitor_loop():
             while self.is_monitoring and self.is_logged_in:
@@ -402,8 +439,16 @@ class GoDaddyRealBot:
     def refresh_auction_data(self):
         """경매 데이터 새로고침"""
         try:
-            # 실제 경매 페이지에서 최신 데이터 가져오기
-            self.load_auction_data()
+            if self.demo_mode:
+                # 데모 모드에서는 가격 변동 시뮬레이션
+                import random
+                for item in self.auction_items:
+                    if random.random() < 0.3:  # 30% 확률로 가격 변동
+                        item.current_bid += random.uniform(1, 5)
+                        item.bid_count += 1
+            else:
+                # 실제 모드에서는 실제 데이터 로드
+                self.load_auction_data()
             
             # 소켓을 통해 클라이언트에 업데이트 전송
             if self.socketio:
@@ -442,16 +487,16 @@ class GoDaddyRealBot:
 
 # Flask 앱 설정
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'godaddy_real_bot_secret_key_2024'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'godaddy_bot_secret_key_2024')
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 # 전역 봇 인스턴스
-bot = GoDaddyRealBot()
+bot = GoDaddyBot()
 
 @app.route('/')
 def index():
     """메인 페이지 (로그인 페이지)"""
-    return render_template('real_index.html')
+    return render_template('index.html')
 
 @app.route('/dashboard')
 def dashboard():
@@ -485,7 +530,7 @@ def api_auctions():
     return jsonify({
         "success": True,
         "items": [item.to_dict() for item in bot.auction_items],
-        "demo_mode": False,
+        "demo_mode": bot.demo_mode,
         "max_bid_limit": bot.max_bid_limit
     })
 
@@ -569,26 +614,29 @@ def handle_stop_monitoring():
     emit('monitoring_stopped')
 
 if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 8080))
+    
     print("=" * 60)
-    print("🚀 GoDaddy 실제 자동 경매 입찰 봇")
+    print("🚀 GoDaddy 자동 경매 입찰 봇")
     print("=" * 60)
     print("✨ 특징:")
-    print("• 실제 GoDaddy 사이트 연동")
+    print("• 실제 GoDaddy 사이트 연동 (데모 모드 기본)")
     print("• 최대 입찰 한도: $180")
     print("• 자동 입찰: 다른 사람이 입찰하면 +$5로 자동 대응")
     print("• 실시간 모니터링: 30초마다 업데이트")
+    print("• Railway 호스팅 지원")
     print("=" * 60)
     print("⚠️  주의사항:")
-    print("1. 실제 GoDaddy 계정으로 로그인합니다.")
-    print("2. 실제 입찰이 실행될 수 있습니다.")
+    print("1. 기본적으로 데모 모드로 실행됩니다.")
+    print("2. 실제 GoDaddy 계정 로그인 가능.")
     print("3. 자동 입찰로 인한 손실에 대해 책임지지 않습니다.")
     print("4. 계정 정보는 안전하게 관리하세요.")
     print("=" * 60)
-    print("🌐 웹 브라우저에서 http://localhost:8080 으로 접속하세요!")
+    print(f"🌐 웹 브라우저에서 http://localhost:{port} 으로 접속하세요!")
     print("=" * 60)
     
     try:
-        socketio.run(app, host='0.0.0.0', port=8080, debug=False)
+        socketio.run(app, host='0.0.0.0', port=port, debug=False)
     except Exception as e:
         logger.error(f"서버 실행 오류: {e}")
         print(f"오류가 발생했습니다: {e}")

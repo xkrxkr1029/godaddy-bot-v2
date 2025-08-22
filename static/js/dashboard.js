@@ -88,7 +88,7 @@ class DashboardManager {
     }
     
     startDashboard() {
-        this.addLog('🎉 대시보드가 로드되었습니다.', 'success');
+        this.addLog('🎉 승환님, 대시보드에 오신 것을 환영합니다!', 'success');
         this.addLog('💡 모니터링을 시작하여 실시간 경매를 확인하세요.', 'info');
         
         // 초기 데이터 로드

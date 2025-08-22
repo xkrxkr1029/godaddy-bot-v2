@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GoDaddy 실제 자동 경매 입찰 봇</title>
+    <title>GoDaddy 자동 경매 입찰 봇</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -26,7 +26,7 @@
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            max-width: 450px;
+            max-width: 500px;
             width: 100%;
         }
         
@@ -71,29 +71,6 @@
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
         }
         
-        .alert {
-            border-radius: 12px;
-            border: none;
-        }
-        
-        .real-mode-badge {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            display: inline-block;
-            margin-bottom: 1rem;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 107, 107, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
-        }
-        
         .feature-list {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border-radius: 12px;
@@ -125,6 +102,17 @@
             margin-top: 1rem;
         }
         
+        .demo-badge {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        
         .spinner-border-sm {
             width: 1rem;
             height: 1rem;
@@ -148,46 +136,51 @@
     <div class="login-container">
         <div class="container">
             <div class="row justify-content-center">
-                <div class="col-md-6">
+                <div class="col-md-8">
                     <div class="login-card">
                         <div class="card-header">
-                            <div class="real-mode-badge">
-                                <i class="fas fa-exclamation-triangle me-1"></i>
-                                실제 모드
+                            <div class="demo-badge">
+                                <i class="fas fa-play-circle me-1"></i>
+                                데모 모드
                             </div>
-                            <h3 class="mb-0">
+                            <h2 class="mb-0">
                                 <i class="fas fa-gavel me-2"></i>
                                 GoDaddy 자동 경매 봇
-                            </h3>
-                            <p class="mb-0 mt-2 opacity-75">실제 GoDaddy 계정으로 로그인</p>
+                            </h2>
+                            <p class="mb-0 mt-2 opacity-75">승환님을 위한 자동 도메인 경매 입찰 시스템</p>
                         </div>
                         
                         <div class="card-body">
                             <!-- 로그인 폼 -->
                             <form id="login-form">
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">
-                                        <i class="fas fa-envelope me-1"></i>
-                                        GoDaddy 이메일
-                                    </label>
-                                    <input type="email" class="form-control" id="email" 
-                                           value="richrich2667@gmail.com" required 
-                                           placeholder="your@email.com">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label">
+                                                <i class="fas fa-envelope me-1"></i>
+                                                GoDaddy 이메일
+                                            </label>
+                                            <input type="email" class="form-control" id="email" 
+                                                   value="richrich2667@gmail.com" required 
+                                                   placeholder="your@email.com">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="password" class="form-label">
+                                                <i class="fas fa-lock me-1"></i>
+                                                비밀번호
+                                            </label>
+                                            <input type="password" class="form-control" id="password" 
+                                                   value="rJk%2.FQ4Wck$eW" required 
+                                                   placeholder="••••••••">
+                                        </div>
+                                    </div>
                                 </div>
                                 
-                                <div class="mb-4">
-                                    <label for="password" class="form-label">
-                                        <i class="fas fa-lock me-1"></i>
-                                        비밀번호
-                                    </label>
-                                    <input type="password" class="form-control" id="password" 
-                                           value="rJk%2.FQ4Wck$eW" required 
-                                           placeholder="••••••••">
-                                </div>
-                                
-                                <button type="submit" class="btn btn-primary w-100" id="login-btn">
+                                <button type="submit" class="btn btn-primary w-100 mb-3" id="login-btn">
                                     <i class="fas fa-sign-in-alt me-1"></i>
-                                    실제 GoDaddy 로그인
+                                    GoDaddy 로그인 시작
                                 </button>
                             </form>
                             
@@ -195,23 +188,37 @@
                             <div class="feature-list">
                                 <h6 class="mb-3">
                                     <i class="fas fa-star text-warning me-1"></i>
-                                    실제 기능
+                                    주요 기능
                                 </h6>
-                                <div class="feature-item">
-                                    <i class="fas fa-check-circle feature-icon"></i>
-                                    <span>실제 GoDaddy 계정 연동</span>
-                                </div>
-                                <div class="feature-item">
-                                    <i class="fas fa-check-circle feature-icon"></i>
-                                    <span>실시간 경매 데이터</span>
-                                </div>
-                                <div class="feature-item">
-                                    <i class="fas fa-check-circle feature-icon"></i>
-                                    <span>자동 입찰 시스템 (+$5)</span>
-                                </div>
-                                <div class="feature-item">
-                                    <i class="fas fa-check-circle feature-icon"></i>
-                                    <span>최대 입찰 한도 $180</span>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="feature-item">
+                                            <i class="fas fa-check-circle feature-icon"></i>
+                                            <span>실제 GoDaddy 계정 연동</span>
+                                        </div>
+                                        <div class="feature-item">
+                                            <i class="fas fa-check-circle feature-icon"></i>
+                                            <span>실시간 경매 모니터링</span>
+                                        </div>
+                                        <div class="feature-item">
+                                            <i class="fas fa-check-circle feature-icon"></i>
+                                            <span>자동 입찰 시스템 (+$5)</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="feature-item">
+                                            <i class="fas fa-check-circle feature-icon"></i>
+                                            <span>최대 입찰 한도 $180</span>
+                                        </div>
+                                        <div class="feature-item">
+                                            <i class="fas fa-check-circle feature-icon"></i>
+                                            <span>모바일 반응형 디자인</span>
+                                        </div>
+                                        <div class="feature-item">
+                                            <i class="fas fa-check-circle feature-icon"></i>
+                                            <span>Railway 클라우드 호스팅</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -221,19 +228,33 @@
                                     <i class="fas fa-exclamation-triangle me-1"></i>
                                     중요 안내
                                 </h6>
-                                <ul class="mb-0 small">
-                                    <li>실제 GoDaddy 계정으로 로그인됩니다</li>
-                                    <li>실제 입찰이 실행될 수 있습니다</li>
-                                    <li>자동 입찰로 인한 손실 책임지지 않음</li>
-                                    <li>계정 정보는 서버에 저장되지 않습니다</li>
-                                </ul>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <ul class="mb-0 small">
+                                            <li>실제 GoDaddy 계정으로 로그인</li>
+                                            <li>실제 입찰이 실행될 수 있음</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="mb-0 small">
+                                            <li>자동 입찰 손실 책임 없음</li>
+                                            <li>계정 정보 서버 저장 안함</li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
                             
                             <!-- 상태 표시 -->
                             <div class="mt-3">
-                                <div id="status-indicator" class="d-flex align-items-center">
-                                    <span class="badge bg-secondary me-2">오프라인</span>
-                                    <small class="text-muted">서버 연결 대기 중...</small>
+                                <div id="status-indicator" class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <span class="badge bg-secondary me-2">오프라인</span>
+                                        <small class="text-muted">서버 연결 대기 중...</small>
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-cloud me-1"></i>
+                                        Railway 호스팅
+                                    </small>
                                 </div>
                             </div>
                             
@@ -243,10 +264,10 @@
                                     <div class="card-header py-2">
                                         <small class="text-muted">
                                             <i class="fas fa-history me-1"></i>
-                                            활동 로그
+                                            실시간 활동 로그
                                         </small>
                                     </div>
-                                    <div class="card-body py-2" style="max-height: 150px; overflow-y: auto;">
+                                    <div class="card-body py-2" style="max-height: 200px; overflow-y: auto;">
                                         <div id="log-container">
                                             <small class="text-muted">로그가 여기에 표시됩니다...</small>
                                         </div>
@@ -278,7 +299,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
     <script>
-        class GoDaddyRealBot {
+        class GoDaddyBot {
             constructor() {
                 this.socket = io();
                 this.isLoggedIn = false;
@@ -313,12 +334,12 @@
                     
                     const loginBtn = document.getElementById('login-btn');
                     loginBtn.disabled = false;
-                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt me-1"></i>실제 GoDaddy 로그인';
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt me-1"></i>GoDaddy 로그인 시작';
                     
                     if (data.success) {
                         this.isLoggedIn = true;
                         this.addLog('✅ GoDaddy 로그인 성공! 대시보드로 이동합니다...', 'success');
-                        this.showToast('로그인 성공!', '승환님의 실제 대시보드로 이동합니다...', 'success');
+                        this.showToast('로그인 성공!', '승환님의 대시보드로 이동합니다...', 'success');
                         
                         // 1.5초 후 대시보드로 리다이렉트
                         setTimeout(() => {
@@ -361,20 +382,20 @@
                     const data = await response.json();
                     
                     if (data.success) {
-                        this.addLog('⏳ 실제 GoDaddy 서버에 연결 중...', 'info');
+                        this.addLog('⏳ GoDaddy 서버에 연결 중...', 'info');
                     } else {
                         this.addLog(`❌ 로그인 요청 실패: ${data.message}`, 'error');
                         this.showToast('오류', data.message, 'error');
                         
                         loginBtn.disabled = false;
-                        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt me-1"></i>실제 GoDaddy 로그인';
+                        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt me-1"></i>GoDaddy 로그인 시작';
                     }
                 } catch (error) {
                     this.addLog(`❌ 네트워크 오류: ${error.message}`, 'error');
                     this.showToast('오류', '네트워크 연결을 확인하세요.', 'error');
                     
                     loginBtn.disabled = false;
-                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt me-1"></i>실제 GoDaddy 로그인';
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt me-1"></i>GoDaddy 로그인 시작';
                 }
             }
             
@@ -384,8 +405,14 @@
                                  type === 'danger' ? 'bg-danger' : 'bg-secondary';
                 
                 indicator.innerHTML = `
-                    <span class="badge ${badgeClass} me-2">${text}</span>
-                    <small class="text-muted">실제 GoDaddy 연동 모드</small>
+                    <div>
+                        <span class="badge ${badgeClass} me-2">${text}</span>
+                        <small class="text-muted">GoDaddy 자동 경매 봇</small>
+                    </div>
+                    <small class="text-muted">
+                        <i class="fas fa-cloud me-1"></i>
+                        Railway 호스팅
+                    </small>
                 `;
             }
             
@@ -414,7 +441,7 @@
                 
                 // 로그 항목이 너무 많으면 오래된 것 삭제
                 const entries = logContainer.children;
-                if (entries.length > 20) {
+                if (entries.length > 30) {
                     entries[0].remove();
                 }
             }
@@ -445,13 +472,14 @@
         }
         
         // 전역 봇 인스턴스 생성
-        const bot = new GoDaddyRealBot();
+        const bot = new GoDaddyBot();
         
         // 페이지 로드 완료 시 초기화
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('GoDaddy 실제 봇이 초기화되었습니다.');
-            bot.addLog('🚀 GoDaddy 실제 경매 봇 시작', 'success');
-            bot.addLog('⚠️ 실제 계정으로 로그인하여 실제 입찰이 가능합니다', 'warning');
+            console.log('GoDaddy 자동 경매 봇이 초기화되었습니다.');
+            bot.addLog('🚀 GoDaddy 자동 경매 봇 시작', 'success');
+            bot.addLog('💡 승환님을 위한 자동 도메인 경매 입찰 시스템입니다', 'info');
+            bot.addLog('⚠️ 데모 모드로 안전하게 테스트할 수 있습니다', 'warning');
         });
     </script>
 </body>
